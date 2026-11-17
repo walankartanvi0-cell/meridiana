@@ -141,13 +141,37 @@ Stage 5 adds working role-specific dashboards:
 - **Buyer:** maintain investment criteria through the buyer profile, review notifications and manage account settings.
 - **Seller:** maintain the business profile, review notifications and manage account details and password.
 
-The sidebar only links to pages that exist. Deal management, documents, NDAs, meetings, tasks and messages are clearly marked as later-stage features instead of appearing as broken links.
+The sidebar only links to pages that exist. Documents, NDAs, meetings, tasks and messages are clearly marked as later-stage features instead of appearing as broken links.
 
 The main API groups used by the dashboards are:
 
 - `/api/admin` – administrator-only user, buyer, seller and analytics endpoints
 - `/api/account` – profile and password endpoints for the signed-in user
 - `/api/notifications` – in-app notification endpoints
+
+### 6. M&A deal management
+
+Stage 6 adds a complete transaction workspace:
+
+- **Deal model and API:** stages, seller and buyer profiles, assigned advisor, enterprise value, EBITDA, expected close date, probability, description, internal notes and buyer saved lists.
+- **Administrator:** create, edit, delete, search and filter every deal; view the whole transaction pipeline.
+- **Advisor:** manage assigned deals, buyer pipeline, seller pipeline and deal progress.
+- **Buyer:** browse available opportunities, save or remove opportunities and open deal details.
+- **Seller:** follow transaction progress with a stage tracker and review buyer interest.
+- **Deal details:** shared detail screen with role-aware controls; internal notes are only shown to administrators and advisors.
+
+The deal API group is `/api/deals`:
+
+- `GET /api/deals` – admin/advisor deal list with optional `stage` and `search` query parameters
+- `GET /api/deals/pipeline` – stage counts and total value
+- `GET /api/deals/options` – buyer, seller and advisor choices for deal forms
+- `GET /api/deals/available`, `GET /api/deals/saved` – buyer opportunity views
+- `GET /api/deals/mine` – seller transaction view
+- `GET /api/deals/:id` – role-checked deal detail
+- `POST /api/deals`, `PATCH /api/deals/:id`, `DELETE /api/deals/:id` – admin/advisor management
+- `POST /api/deals/:id/save`, `DELETE /api/deals/:id/save` – buyer saved opportunities
+
+Deal creation notifications are written to the assigned advisor's in-app notification list. All deal endpoints verify the JWT and role on the server.
 
 ## Build plan
 
@@ -156,7 +180,7 @@ The main API groups used by the dashboards are:
 - [x] Stage 3 – Backend setup and MongoDB connection
 - [x] Stage 4 – Registration, login and authentication
 - [x] Stage 5 – User roles and dashboards
-- [ ] Stage 6 – M&A deal management features
+- [x] Stage 6 – M&A deal management features
 - [ ] Stage 7 – Document management and other functionality
 - [ ] Stage 8 – Testing, fixes and deployment preparation
 

@@ -8,6 +8,7 @@ import { notFound } from "./middleware/notFound";
 import accountRouter from "./routes/account.routes";
 import adminRouter from "./routes/admin.routes";
 import authRouter from "./routes/auth.routes";
+import dealRouter from "./routes/deal.routes";
 import notificationRouter from "./routes/notification.routes";
 import { consultationRouter, contactRouter } from "./routes/inquiry.routes";
 
@@ -40,6 +41,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/account", accountRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/deals", dealRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/consultations", consultationRouter);

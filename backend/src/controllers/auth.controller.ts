@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { toPublicUser } from "../utils/publicUser";
 import { createAccessToken } from "../utils/token";
 import { sendResponse } from "../utils/sendResponse";
+import { notify } from "../utils/notify";
 import { User } from "../models/User";
 
 /** POST /api/auth/register – public buyer/seller registration. */
@@ -15,6 +16,12 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = await User.create({ name, email, password, role, company, phone });
+  await notify({
+    userId: user.id,
+    title: "Welcome to Meridiana",
+    message: "Your account is ready. Complete your profile to get the most from your workspace.",
+    type: "account",
+  });
   const token = createAccessToken(user);
 
   sendResponse(res, 201, "Your account has been created.", {
@@ -86,6 +93,12 @@ export const adminCreateUser = asyncHandler(async (req: Request, res: Response) 
     company,
     phone,
     status: status ?? "active",
+  });
+  await notify({
+    userId: user.id,
+    title: "Your Meridiana account is ready",
+    message: "An administrator has created your account. Sign in to review your workspace.",
+    type: "account",
   });
 
   sendResponse(res, 201, "User created successfully.", {

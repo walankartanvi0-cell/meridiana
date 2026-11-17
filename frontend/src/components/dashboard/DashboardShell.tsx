@@ -1,20 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import Logo from "@/components/layout/Logo";
+import { DASHBOARD_SECTIONS } from "@/lib/dashboard";
 import { ROLE_HOME, ROLE_LABELS } from "@/types/auth";
+import Logo from "@/components/layout/Logo";
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [signingOut, setSigningOut] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) return null;
 
-  const home = ROLE_HOME[user.role];
+  const sections = DASHBOARD_SECTIONS[user.role];
   const roleLabel = ROLE_LABELS[user.role];
 
   async function handleSignOut() {
@@ -28,10 +31,23 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-ivory-50 text-navy-900">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-navy-900/10 bg-navy-950 px-6 py-8 lg:flex">
-        <Logo light href={home} />
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-navy-950/60 lg:hidden"
+        />
+      )}
 
-        <div className="mt-10 border-y border-ivory-200/10 py-6">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-y-auto border-r border-navy-900/10 bg-navy-950 px-6 py-8 transition-transform lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <Logo light href={ROLE_HOME[user.role]} />
+
+        <div className="mt-8 border-y border-ivory-200/10 py-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ivory-200/40">
             Signed in as
           </p>
@@ -41,20 +57,44 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           </span>
         </div>
 
-        <nav className="mt-8 grid gap-2" aria-label="Dashboard navigation">
-          <Link
-            href={home}
-            className="border-l-2 border-gold-500 bg-ivory-200/5 px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-ivory-50"
-          >
-            Overview
-          </Link>
-          <Link
-            href="/"
-            className="border-l-2 border-transparent px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-ivory-200/60 transition-colors hover:border-gold-500 hover:text-ivory-50"
-          >
-            Public website
-          </Link>
+        <nav className="mt-6 grid gap-1" aria-label="Dashboard navigation">
+          {sections.map((section) => {
+            if (!section.href) {
+              return (
+                <div
+                  key={section.label}
+                  className="flex items-center justify-between px-4 py-2.5 text-[11px] text-ivory-200/35"
+                >
+                  <span>{section.label}</span>
+                  <span className="text-[8px] uppercase tracking-[0.12em]">{section.badge}</span>
+                </div>
+              );
+            }
+
+            const active = pathname === section.href;
+            return (
+              <Link
+                key={section.label}
+                href={section.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`border-l-2 px-4 py-2.5 text-[11px] font-medium transition-colors ${
+                  active
+                    ? "border-gold-500 bg-ivory-200/5 text-ivory-50"
+                    : "border-transparent text-ivory-200/60 hover:border-gold-500 hover:text-ivory-50"
+                }`}
+              >
+                {section.label}
+              </Link>
+            );
+          })}
         </nav>
+
+        <Link
+          href="/"
+          className="mt-6 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ivory-200/50 transition-colors hover:text-gold-400"
+        >
+          Public website
+        </Link>
 
         <button
           type="button"
@@ -68,11 +108,23 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
       <div className="lg:pl-72">
         <header className="flex h-20 items-center justify-between border-b border-navy-900/10 bg-white px-6 lg:px-10">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-600">
-              Meridiana portal
-            </p>
-            <p className="mt-1 font-display text-xl text-navy-900">{roleLabel} workspace</p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              aria-label="Open navigation"
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-10 w-10 items-center justify-center border border-navy-900/15 text-navy-900 lg:hidden"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-600">
+                Meridiana portal
+              </p>
+              <p className="mt-1 font-display text-xl text-navy-900">{roleLabel} workspace</p>
+            </div>
           </div>
           <div className="flex items-center gap-5">
             <div className="hidden text-right sm:block">

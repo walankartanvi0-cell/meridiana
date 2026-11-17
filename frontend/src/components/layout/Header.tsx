@@ -1,17 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { mainNavigation } from "@/lib/site";
+import { ROLE_HOME } from "@/types/auth";
 import Logo from "./Logo";
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
   // The menu is "open" only while it belongs to the current page.
   // Navigating to another page automatically closes it – no effect needed.
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const mobileOpen = menuPath === pathname;
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await logout();
+    router.push("/");
+  }
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
@@ -26,10 +37,37 @@ export default function Header() {
             <Link href="/contact" className="transition-colors hover:text-gold-400">
               Contact
             </Link>
-            <span className="h-3 w-px bg-white/20" />
-            <Link href="/login" className="transition-colors hover:text-gold-400">
-              Client Login
-            </Link>
+            {user ? (
+              <>
+                <span className="h-3 w-px bg-white/20" />
+                <Link
+                  href={ROLE_HOME[user.role]}
+                  className="transition-colors hover:text-gold-400"
+                >
+                  Dashboard
+                </Link>
+                <span className="h-3 w-px bg-white/20" />
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={signingOut}
+                  className="transition-colors hover:text-gold-400 disabled:opacity-50"
+                >
+                  {signingOut ? "Signing out…" : "Sign out"}
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="h-3 w-px bg-white/20" />
+                <Link href="/login" className="transition-colors hover:text-gold-400">
+                  Client Login
+                </Link>
+                <span className="h-3 w-px bg-white/20" />
+                <Link href="/register" className="transition-colors hover:text-gold-400">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -92,10 +130,10 @@ export default function Header() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/consultation"
+              href={user ? ROLE_HOME[user.role] : "/consultation"}
               className="hidden bg-navy-900 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-navy-800 sm:inline-flex"
             >
-              Request a Consultation
+              {user ? "Go to Dashboard" : "Request a Consultation"}
             </Link>
             <button
               type="button"
@@ -146,18 +184,39 @@ export default function Header() {
               </div>
             ))}
             <div className="mt-6 grid gap-3">
-              <Link
-                href="/consultation"
-                className="bg-gold-500 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-950"
-              >
-                Request a Consultation
-              </Link>
-              <Link
-                href="/login"
-                className="border border-navy-900/20 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-900"
-              >
-                Client Login
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href={ROLE_HOME[user.role]}
+                    className="bg-gold-500 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-950"
+                  >
+                    Go to Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => void handleSignOut()}
+                    disabled={signingOut}
+                    className="border border-navy-900/20 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-900 disabled:opacity-50"
+                  >
+                    {signingOut ? "Signing out…" : "Sign out"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/consultation"
+                    className="bg-gold-500 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-950"
+                  >
+                    Request a Consultation
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="border border-navy-900/20 px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-navy-900"
+                  >
+                    Client Login
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

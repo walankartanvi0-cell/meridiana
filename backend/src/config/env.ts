@@ -16,10 +16,13 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   clientUrl: process.env.CLIENT_URL ?? "http://localhost:3000",
   maxFileSizeMb: numberValue(process.env.MAX_FILE_SIZE_MB, 10),
+  seedAdminName: process.env.SEED_ADMIN_NAME ?? "Meridiana Administrator",
+  seedAdminEmail: process.env.SEED_ADMIN_EMAIL ?? "admin@meridiana.local",
+  seedAdminPassword: process.env.SEED_ADMIN_PASSWORD ?? "",
 };
 
 export function validateEnv(): void {
-  if (env.nodeEnv === "production" && !env.jwtSecret) {
-    throw new Error("JWT_SECRET must be set in production. Check your .env file.");
+  if (!env.jwtSecret || env.jwtSecret === "replace-me-with-a-long-random-secret") {
+    throw new Error("JWT_SECRET must be set to a long random value in backend/.env.");
   }
 }

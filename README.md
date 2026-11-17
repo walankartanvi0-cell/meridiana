@@ -63,7 +63,7 @@ Copy the example files and fill in your own values:
 - `frontend/.env.local.example` → `frontend/.env.local`
 - `backend/.env.example` → `backend/.env`
 
-In `backend/.env`, set `JWT_SECRET` to a long random string. The `MONGO_URI` value is only needed when using a real MongoDB server.
+In `backend/.env`, set `JWT_SECRET` to a long random string. The `MONGO_URI` value is only needed when using a real MongoDB server. The `SEED_ADMIN_*` values create the first administrator when the local development server starts.
 
 ### 3. Run both apps
 
@@ -107,12 +107,37 @@ The contact and consultation forms save their submissions to MongoDB through:
 - `POST /api/contact`
 - `POST /api/consultations`
 
+### 4. Accounts and sign-in
+
+The website has two public registration roles: **Buyer** and **Seller**. Administrator and Advisor accounts are created by an administrator through the protected API.
+
+Local development creates one administrator from `backend/.env` on first start:
+
+- Email: the value of `SEED_ADMIN_EMAIL`
+- Password: the value of `SEED_ADMIN_PASSWORD`
+
+For a real database, set those values and run this command once from the `backend` folder:
+
+```bash
+npm run seed:admin
+```
+
+Authentication endpoints:
+
+- `POST /api/auth/register` – public buyer/seller registration
+- `POST /api/auth/login` – returns a JWT and the safe user profile
+- `GET /api/auth/me` – returns the current user (requires a token)
+- `POST /api/auth/logout` – confirms sign-out; the browser then removes its token
+- `POST /api/auth/users` – administrator-only account creation
+
+After signing in, each role is sent to its own dashboard: `/dashboard/admin`, `/dashboard/advisor`, `/dashboard/buyer` or `/dashboard/seller`. Passwords are hashed with bcrypt, and every protected API request checks the JWT and the user's role.
+
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure
 - [x] Stage 2 – Frontend design and public website
 - [x] Stage 3 – Backend setup and MongoDB connection
-- [ ] Stage 4 – Registration, login and authentication
+- [x] Stage 4 – Registration, login and authentication
 - [ ] Stage 5 – User roles and dashboards
 - [ ] Stage 6 – M&A deal management features
 - [ ] Stage 7 – Document management and other functionality

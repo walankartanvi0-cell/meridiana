@@ -4,6 +4,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import app from "./app";
 import { connectDB, disconnectDB } from "./config/db";
 import { env, validateEnv } from "./config/env";
+import { seedAdminUser } from "./utils/seedAdmin";
 
 /**
  * LOCAL DEVELOPMENT ONLY.
@@ -29,6 +30,13 @@ async function start(): Promise<void> {
 
   const uri = memoryServer.getUri("meridiana");
   await connectDB(uri);
+
+  const adminSeed = await seedAdminUser();
+  if (adminSeed.created) {
+    console.log(`Development administrator created: ${adminSeed.email}`);
+  } else if (adminSeed.reason === "missing-password") {
+    console.log("Tip: set SEED_ADMIN_PASSWORD in backend/.env to create a local admin account.");
+  }
 
   const server = app.listen(env.port, () => {
     console.log("Using a local development MongoDB (no installation required).");

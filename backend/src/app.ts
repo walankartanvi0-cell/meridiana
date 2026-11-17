@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
+import authRouter from "./routes/auth.routes";
 import { consultationRouter, contactRouter } from "./routes/inquiry.routes";
 
 const app = express();
@@ -33,6 +34,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // API routes. More routers will be added here in later stages.
+app.use("/api/auth", authRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/consultations", consultationRouter);
 

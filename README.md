@@ -86,7 +86,7 @@ Then open http://localhost:3000 in your browser. The API runs at http://localhos
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure
-- [ ] Stage 2 – Frontend design and public website
+- [x] Stage 2 – Frontend design and public website
 - [ ] Stage 3 – Backend setup and MongoDB connection
 - [ ] Stage 4 – Registration, login and authentication
 - [ ] Stage 5 – User roles and dashboards

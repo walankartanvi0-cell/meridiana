@@ -1,9 +1,18 @@
+import fs from "fs";
+import path from "path";
 import type { Request, Response } from "express";
+import { UPLOAD_DIR } from "../config/upload";
 import { USER_ROLES } from "../constants/roles";
 import { Buyer } from "../models/Buyer";
+import { Deal } from "../models/Deal";
+import { DocumentFile } from "../models/Document";
 import { Inquiry } from "../models/Inquiry";
+import { Meeting } from "../models/Meeting";
+import { Message } from "../models/Message";
+import { Nda } from "../models/NDA";
 import { Notification } from "../models/Notification";
 import { Seller } from "../models/Seller";
+import { Task } from "../models/Task";
 import { User } from "../models/User";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -91,12 +100,63 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
+  const [buyer, seller] = await Promise.all([
+    Buyer.findOne({ user: user._id }).select("_id"),
+    Seller.findOne({ user: user._id }).select("_id"),
+  ]);
+
+  // A person attached to a deal must be reassigned first. Deleting them would
+  // leave the deal pointing at a profile that no longer exists.
+  const linkedDeal = await Deal.exists({
+    $or: [
+      { advisor: user._id },
+      ...(buyer ? [{ buyer: buyer._id }] : []),
+      ...(seller ? [{ seller: seller._id }] : []),
+    ],
+  });
+  if (linkedDeal) {
+    throw new ApiError(
+      400,
+      "Reassign this person's deals before deleting the account.",
+    );
+  }
+
+  const documents = await DocumentFile.find({ uploadedBy: user._id }).select(
+    "_id storedName",
+  );
+  const documentIds = documents.map((document) => document._id);
+
   await Promise.all([
-    User.deleteOne({ _id: user._id }),
+    Nda.deleteMany({
+      $or: [
+        { requestedBy: user._id },
+        ...(buyer ? [{ buyer: buyer._id }] : []),
+      ],
+    }),
+    documentIds.length
+      ? Nda.updateMany({ document: { $in: documentIds } }, { $unset: { document: 1 } })
+      : Promise.resolve(),
+    DocumentFile.deleteMany({ uploadedBy: user._id }),
+    Task.deleteMany({ $or: [{ assignedTo: user._id }, { createdBy: user._id }] }),
+    Meeting.deleteMany({ organizer: user._id }),
+    Meeting.updateMany({ attendees: user._id }, { $pull: { attendees: user._id } }),
+    Message.deleteMany({ sender: user._id }),
+    Message.updateMany({ recipients: user._id }, { $pull: { recipients: user._id } }),
+    Message.updateMany({ readBy: user._id }, { $pull: { readBy: user._id } }),
+    Deal.updateMany({ savedBy: user._id }, { $pull: { savedBy: user._id } }),
+    Notification.deleteMany({ user: user._id }),
     Buyer.deleteOne({ user: user._id }),
     Seller.deleteOne({ user: user._id }),
-    Notification.deleteMany({ user: user._id }),
+    User.deleteOne({ _id: user._id }),
   ]);
+
+  await Promise.all(
+    documents.map((document) =>
+      fs.promises
+        .unlink(path.join(UPLOAD_DIR, path.basename(document.storedName)))
+        .catch(() => undefined),
+    ),
+  );
 
   sendResponse(res, 200, "User deleted successfully.");
 });
@@ -163,8 +223,20 @@ export const updateBuyer = asyncHandler(async (req: Request, res: Response) => {
 
 /** DELETE /api/admin/buyers/:id */
 export const deleteBuyer = asyncHandler(async (req: Request, res: Response) => {
-  const buyer = await Buyer.findByIdAndDelete(req.params.id);
+  const buyer = await Buyer.findById(req.params.id);
   if (!buyer) throw new ApiError(404, "Buyer profile not found.");
+
+  // Deals store a reference to this profile, so deleting it would leave the
+  // deal pointing at nothing. Ask the administrator to reassign it first.
+  if (await Deal.exists({ buyer: buyer._id })) {
+    throw new ApiError(
+      400,
+      "Remove this buyer from their deals before deleting the profile.",
+    );
+  }
+
+  await Nda.deleteMany({ buyer: buyer._id });
+  await buyer.deleteOne();
   sendResponse(res, 200, "Buyer profile deleted.");
 });
 
@@ -230,8 +302,17 @@ export const updateSeller = asyncHandler(async (req: Request, res: Response) => 
 
 /** DELETE /api/admin/sellers/:id */
 export const deleteSeller = asyncHandler(async (req: Request, res: Response) => {
-  const seller = await Seller.findByIdAndDelete(req.params.id);
+  const seller = await Seller.findById(req.params.id);
   if (!seller) throw new ApiError(404, "Seller profile not found.");
+
+  if (await Deal.exists({ seller: seller._id })) {
+    throw new ApiError(
+      400,
+      "Remove this seller from their deals before deleting the profile.",
+    );
+  }
+
+  await seller.deleteOne();
   sendResponse(res, 200, "Seller profile deleted.");
 });
 

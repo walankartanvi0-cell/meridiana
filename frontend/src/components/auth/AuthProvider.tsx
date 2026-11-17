@@ -85,7 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (input: RegisterInput) => {
     const response = await apiFetch<AuthPayload>("/auth/register", {
       method: "POST",
-      body: JSON.stringify(input),
+      // The API checks the confirmation field, so mirror the password here.
+      body: JSON.stringify({ ...input, confirmPassword: input.password }),
       skipAuth: true,
     });
 

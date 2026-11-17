@@ -36,7 +36,15 @@ export type NotificationRecord = {
   _id: string;
   title: string;
   message: string;
-  type: "system" | "account" | "deal" | "document" | "meeting";
+  type:
+    | "system"
+    | "account"
+    | "deal"
+    | "document"
+    | "nda"
+    | "meeting"
+    | "task"
+    | "message";
   read: boolean;
   link?: string;
   createdAt: string;

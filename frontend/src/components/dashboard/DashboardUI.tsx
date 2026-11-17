@@ -33,7 +33,7 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="border border-navy-900/10 bg-white shadow-[0_20px_60px_-45px_rgba(10,25,47,0.5)]">
+    <section className="min-w-0 border border-navy-900/10 bg-white shadow-[0_20px_60px_-45px_rgba(10,25,47,0.5)]">
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-navy-900/10 px-6 py-5">
         <div>
           <h2 className="font-display text-2xl text-navy-900">{title}</h2>
@@ -83,17 +83,31 @@ export function StatCard({
 
 export function StatusPill({ value }: { value: string }) {
   const current = value.toLowerCase();
-  const positive = ["active", "read"].includes(current);
-  const warning = ["draft", "paused", "suspended", "closed"].includes(current);
+  const positive = ["active", "read", "signed", "completed", "done"].includes(current);
+  const negative = ["declined", "expired", "cancelled", "high", "overdue"].includes(current);
+  const warning = [
+    "draft",
+    "paused",
+    "suspended",
+    "closed",
+    "requested",
+    "under review",
+    "scheduled",
+    "in progress",
+    "to do",
+    "medium",
+  ].includes(current);
 
   return (
     <span
       className={`inline-flex px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] ${
         positive
           ? "bg-emerald-50 text-emerald-700"
-          : warning
-            ? "bg-amber-50 text-amber-700"
-            : "bg-navy-900/5 text-charcoal-600"
+          : negative
+            ? "bg-red-50 text-red-700"
+            : warning
+              ? "bg-amber-50 text-amber-700"
+              : "bg-navy-900/5 text-charcoal-600"
       }`}
     >
       {value}

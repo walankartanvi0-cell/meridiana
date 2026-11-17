@@ -1,3 +1,4 @@
+import fs from "fs";
 import type { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { ApiError } from "../utils/ApiError";
@@ -8,6 +9,12 @@ export function validate(req: Request, _res: Response, next: NextFunction): void
   if (result.isEmpty()) {
     next();
     return;
+  }
+
+  // A multipart upload is parsed before validation, so remove the saved file
+  // when the accompanying fields are rejected.
+  if (req.file?.path) {
+    void fs.promises.unlink(req.file.path).catch(() => undefined);
   }
 
   const errors = result.array().map((item) => ({

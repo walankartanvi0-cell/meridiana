@@ -18,6 +18,11 @@ export function errorHandler(
     statusCode = error.statusCode;
     message = error.message;
     details = error.details;
+  } else if (error instanceof mongoose.Error.CastError) {
+    // A malformed id reached the database. Validators catch most of these, but
+    // this is a safety net so clients never receive a 500 for bad input.
+    statusCode = 400;
+    message = "Invalid identifier.";
   } else if (error instanceof mongoose.Error.ValidationError) {
     statusCode = 400;
     message = Object.values(error.errors).map((item) => item.message)[0] ?? message;
@@ -36,8 +41,20 @@ export function errorHandler(
     statusCode = 401;
     message = "Your session has expired. Please sign in again.";
   } else if (error instanceof Error && error.name === "MulterError") {
-    statusCode = 400;
-    message = error.message;
+    const code = (error as Error & { code?: string }).code;
+    statusCode = code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    message =
+      code === "LIMIT_FILE_SIZE"
+        ? "The file is larger than the allowed upload limit."
+        : error.message;
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "type" in error &&
+    (error as { type?: string }).type === "entity.too.large"
+  ) {
+    statusCode = 413;
+    message = "The request is too large.";
   } else if (
     typeof error === "object" &&
     error !== null &&
@@ -49,6 +66,17 @@ export function errorHandler(
   } else if (error instanceof SyntaxError && "body" in error) {
     statusCode = 400;
     message = "The request contains invalid JSON.";
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof (error as { status?: unknown }).status === "number" &&
+    (error as { status: number }).status >= 400 &&
+    (error as { status: number }).status < 500
+  ) {
+    // Body-parser and similar middleware attach a safe HTTP status.
+    statusCode = (error as { status: number }).status;
+    message = statusCode === 413 ? "The request is too large." : "The request could not be processed.";
   } else if (error instanceof Error && env.nodeEnv === "development") {
     message = error.message;
   }

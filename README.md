@@ -141,7 +141,7 @@ Stage 5 adds working role-specific dashboards:
 - **Buyer:** maintain investment criteria through the buyer profile, review notifications and manage account settings.
 - **Seller:** maintain the business profile, review notifications and manage account details and password.
 
-The sidebar only links to pages that exist. Documents, NDAs, meetings, tasks and messages are clearly marked as later-stage features instead of appearing as broken links.
+The sidebar only links to pages that exist. Documents, NDAs, meetings, tasks and messages became live pages in Stage 7.
 
 The main API groups used by the dashboards are:
 
@@ -173,6 +173,53 @@ The deal API group is `/api/deals`:
 
 Deal creation notifications are written to the assigned advisor's in-app notification list. All deal endpoints verify the JWT and role on the server.
 
+### 7. Documents, NDAs, meetings, tasks and messages
+
+Stage 7 completes the collaboration workspace for every role:
+
+- **Documents:** authenticated upload and download with generated file names, an allowed file-type list and a 10 MB default size limit. Each document can be linked to a deal and limited to chosen roles.
+- **NDAs:** buyers request confidentiality for an assigned deal or an unassigned buyer-visible opportunity; administrators and advisors record status, signature dates and the signed file.
+- **Meetings:** schedule meetings with optional deal links, attendees, duration, location, agenda and status. Deal-linked meetings invite the advisor, buyer and seller parties automatically.
+- **Tasks:** assign work with priority, status and optional due date. Deals, assignees and creators are linked.
+- **Messages:** deal-linked or general messages with recipients, read tracking and unread counts.
+- **Delete safety:** deleting a deal removes its documents, NDAs, meetings, tasks, messages and uploaded files. A buyer or seller profile, or a user account, cannot be deleted while a deal still references it.
+
+The collaboration API groups are:
+
+- `/api/documents` – upload, list, detail, authenticated download, update and delete
+- `/api/ndas` – request, list, detail, update status/signature and delete
+- `/api/meetings` – list, detail, create, update and delete
+- `/api/tasks` – list, detail, create, update and delete
+- `/api/messages` – list, detail, send, mark read and delete
+- `/api/documents/options` – deal and user choices for collaboration forms
+
+Access rules are enforced on the server. Administrators see everything; advisors see only assigned deals; buyers and sellers see only records linked to their own profiles. Malformed identifiers return a clean `400`, and oversized or invalid payloads return `400` or `413` instead of crashing.
+
+### 8. Quality checks
+
+The backend was tested with hostile input as well as normal use. The suites cover:
+
+- invalid and malformed identifiers, malformed JSON, oversized JSON and oversized uploads
+- NoSQL injection attempts, mass-assignment attempts and tampered or missing tokens
+- role escalation and cross-tenant access between buyers, sellers and advisors
+- NDA list scoping and safe document linking
+- deal deletion cascades and referential-integrity checks on profile and user deletion
+- consistent error envelopes and administrator self-protection
+
+Run the checks while both apps are running:
+
+```bash
+cd backend
+npm run typecheck
+npm run build
+```
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure
@@ -181,8 +228,8 @@ Deal creation notifications are written to the assigned advisor's in-app notific
 - [x] Stage 4 – Registration, login and authentication
 - [x] Stage 5 – User roles and dashboards
 - [x] Stage 6 – M&A deal management features
-- [ ] Stage 7 – Document management and other functionality
-- [ ] Stage 8 – Testing, fixes and deployment preparation
+- [x] Stage 7 – Documents, NDAs, meetings, tasks and messages
+- [ ] Stage 8 – Deployment preparation and final testing
 
 ## Safety notes
 

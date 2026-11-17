@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Meridiana">
+  <rect width="64" height="64" fill="#07121f" />
+  <path d="M13 47V17h6.5L32 35.5 44.5 17H51v30h-6.5V29L32 45.5 19.5 29v18z" fill="#c8a45c" />
+  <rect x="13" y="51" width="38" height="1.5" fill="#c8a45c" opacity="0.55" />
+</svg>

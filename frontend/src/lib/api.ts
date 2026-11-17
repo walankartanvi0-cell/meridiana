@@ -59,5 +59,13 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
       : "Something went wrong. Please try again.";
 
   if (!response.ok) throw new ApiError(message, response.status);
+
+  // Every successful API response is wrapped as { success, message, data }.
+  // Unwrap `data` so callers can read the resource directly.
+  if (payload && typeof payload === "object" && "data" in payload) {
+    const envelope = payload as { data?: T };
+    if (envelope.data !== undefined) return envelope.data;
+  }
+
   return payload as T;
 }

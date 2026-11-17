@@ -1,6 +1,14 @@
 import { Schema, model, type Document, type Model, type Types } from "mongoose";
 
-export type NotificationType = "system" | "account" | "deal" | "document" | "meeting";
+export type NotificationType =
+  | "system"
+  | "account"
+  | "deal"
+  | "document"
+  | "nda"
+  | "meeting"
+  | "task"
+  | "message";
 
 export interface INotification extends Document {
   user: Types.ObjectId;
@@ -22,7 +30,16 @@ const notificationSchema = new Schema<INotification, NotificationModel>(
     message: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ["system", "account", "deal", "document", "meeting"],
+      enum: [
+        "system",
+        "account",
+        "deal",
+        "document",
+        "nda",
+        "meeting",
+        "task",
+        "message",
+      ],
       default: "system",
     },
     read: { type: Boolean, default: false },

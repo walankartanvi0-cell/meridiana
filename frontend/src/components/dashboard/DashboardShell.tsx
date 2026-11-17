@@ -59,18 +59,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
         <nav className="mt-6 grid gap-1" aria-label="Dashboard navigation">
           {sections.map((section) => {
-            if (!section.href) {
-              return (
-                <div
-                  key={section.label}
-                  className="flex items-center justify-between px-4 py-2.5 text-[11px] text-ivory-200/35"
-                >
-                  <span>{section.label}</span>
-                  <span className="text-[8px] uppercase tracking-[0.12em]">{section.badge}</span>
-                </div>
-              );
-            }
-
             const active = pathname === section.href;
             return (
               <Link

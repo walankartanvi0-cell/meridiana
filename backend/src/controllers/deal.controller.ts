@@ -1,9 +1,17 @@
+import fs from "fs";
+import path from "path";
 import type { Request, Response } from "express";
 import { Types } from "mongoose";
+import { UPLOAD_DIR } from "../config/upload";
 import { BUYER_VISIBLE_STAGES, DEAL_STAGES } from "../constants/deals";
 import { Buyer } from "../models/Buyer";
 import { Deal, type IDeal } from "../models/Deal";
+import { DocumentFile } from "../models/Document";
+import { Meeting } from "../models/Meeting";
+import { Message } from "../models/Message";
+import { Nda } from "../models/NDA";
 import { Seller } from "../models/Seller";
+import { Task } from "../models/Task";
 import { User } from "../models/User";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -324,6 +332,26 @@ export const deleteDeal = asyncHandler(async (req: Request, res: Response) => {
   const deal = await Deal.findById(routeId(req.params.id));
   if (!deal) throw new ApiError(404, "Deal not found.");
   if (!canManage(req, deal)) throw new ApiError(403, "You do not have permission to delete this deal.");
+
+  // Remove every record that belongs to this deal, plus the files on disk,
+  // so deleting a deal never leaves orphaned or unreachable data behind.
+  const documents = await DocumentFile.find({ deal: deal._id }).select("storedName");
+
+  await Promise.all([
+    DocumentFile.deleteMany({ deal: deal._id }),
+    Nda.deleteMany({ deal: deal._id }),
+    Meeting.deleteMany({ deal: deal._id }),
+    Task.deleteMany({ deal: deal._id }),
+    Message.deleteMany({ deal: deal._id }),
+  ]);
+
+  await Promise.all(
+    documents.map((document) =>
+      fs.promises
+        .unlink(path.join(UPLOAD_DIR, path.basename(document.storedName)))
+        .catch(() => undefined),
+    ),
+  );
 
   await deal.deleteOne();
   sendResponse(res, 200, "Deal deleted.");

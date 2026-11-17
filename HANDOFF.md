@@ -18,47 +18,49 @@ Then return to the existing conversation:
 
 If you start a **new** session instead, tell the assistant:
 
-> Read `HANDOFF.md` and continue Meridiana from Stage 7.
+> Read `HANDOFF.md` and continue Meridiana from Stage 8.
 
 The project files and this note are on disk, so a new session can continue even without the old chat.
 
 ## Current stage
 
-Stages 1 through 6 are complete and committed. The next work is Stage 7: documents, NDAs, meetings, tasks and messages.
+Stages 1 through 7 are complete and committed. The next work is **Stage 8: deployment preparation and final testing**.
 
-### What Stage 6 delivered
+### What Stage 7 delivered
 
 Backend:
 
-- Deal model with stages, seller and buyer references, advisor assignment, values, probability, dates, notes and buyer saved list.
-- Deal constants and validation.
-- Protected `/api/deals` router with role-restricted list, pipeline, options, available, saved, mine, detail, create, update, delete, save and unsave endpoints.
-- In-app notification when a deal is created or moves stage.
-- Buyer-visible stage rules so only appropriate opportunities are shown.
-- Server-side checks preventing buyers and sellers from managing deals and preventing advisors from editing deals assigned to someone else.
+- Document model and secure uploads: generated file names, allowed extensions, 10 MB default limit, authenticated download route.
+- NDA model and workflow with role-based scoping, signature recording and safe document linking.
+- Meeting model with deal links, attendees, duration, location, agenda and status; deal-linked meetings auto-invite the deal parties.
+- Task model with assignee, creator, priority, status and due date.
+- Message model with deal links, recipients, read tracking and unread counts.
+- Shared `dealAccess` helpers used by every collaboration controller.
+- New notification types: `nda`, `task` and `message`.
+- Collaboration routers: `/api/documents`, `/api/ndas`, `/api/meetings`, `/api/tasks`, `/api/messages`.
+- `GET /api/documents/options` supplies deal and user choices for collaboration forms.
 
 Frontend:
 
-- Admin deal management with search, stage filtering, create, edit, delete and detail links.
-- Advisor assigned-deal management.
-- Shared transaction pipeline board with buyer and seller pipeline filters and deal progress watchlist.
-- Buyer available, saved and all-deal pages with working save/remove actions.
-- Seller transaction progress with a visual stage tracker and buyer interest view.
-- Shared role-aware deal detail page with stage updates for managers and internal notes restricted to managers.
-- Live Stage 6 sidebar links and deal counts on all four role overviews.
-- Dynamic deal detail routes use a Server Component Suspense boundary, as required by Next.js 16 with `cacheComponents`.
+- Five role-aware panels: documents, NDAs, meetings, tasks and messages.
+- 19 role route pages across the four dashboards (54 dashboard pages in total).
+- Live sidebar links for every collaboration section; overview quick links and open-task counts.
+- Null-safe NDA rendering when a deal is no longer present.
 
-### Important Next.js 16 notes
+### Quality fixes made during Stage 7 QA
 
-- The project's `AGENTS.md` requires reading the installed docs in `frontend/node_modules/next/dist/docs/` before writing frontend code.
-- `params` in dynamic pages is a `Promise`. Do not access it synchronously.
-- With `cacheComponents`, dynamic params must be read inside `<Suspense>` or a route-level `loading.tsx`.
-- Do not use current dates/times during prerendering.
-- React lint rules reject synchronous `setState` inside effects.
+- Invalid ObjectId query parameters now return `400` instead of `500` (shared `queryObjectId` helper).
+- NDA list filters use `$and`, so query parameters narrow the role scope instead of widening it.
+- NDA document linking only accepts a document tied to the deal, uploaded by the acting user, uploaded by staff, or uploaded by the NDA's own buyer.
+- Deleting a deal cascades its documents, NDAs, meetings, tasks and messages, and removes files from disk.
+- Deleting a buyer/seller profile or a user attached to a deal is blocked until the deal is reassigned.
+- `errorHandler` now handles `CastError`, Multer size errors, body-parser 4xx and `413` payloads.
+- `express.urlencoded` now has a `100kb` limit.
+- Frontend `NdaPanel` no longer crashes when an NDA's deal is missing.
 
 ### Verification completed
 
-All of these passed before the Stage 6 commit:
+All of these passed before the Stage 7 commit:
 
 ```bash
 cd frontend
@@ -72,30 +74,41 @@ npm run typecheck
 npm run build
 ```
 
-Three API test scripts passed:
+Test scripts (all currently green):
 
 ```text
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-hostile-input.mjs              (68 checks)
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage7-api-integration.mjs
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage7-ui-smoke.mjs            (56 page checks)
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-ui-flow-test.mjs               (14 checks)
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-responsive-audit.mjs           (1440/1024/768/390 px)
 C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage5-api-test.mjs
 C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage5-ui-api-integration.mjs
 C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage6-api-integration.mjs
 ```
 
-The Stage 6 script covers deal CRUD, pipeline data, deal options, buyer/seller views, saved opportunities, stage updates, validation and role-based access blocks. No `href="#"`, empty links or `Stage 6` placeholder badges remain in `frontend/src`.
+The frontend production build generates 70 routes. `npm audit --omit=dev` reports zero vulnerabilities in both projects.
 
-The frontend production build generated 50 routes, including four partial-prerendered dynamic deal detail routes.
+### Important Next.js 16 notes
 
-## Next stage: Stage 7
+- The project's `AGENTS.md` requires reading the installed docs in `frontend/node_modules/next/dist/docs/` before writing frontend code.
+- `params` in dynamic pages is a `Promise`. Do not access it synchronously.
+- With `cacheComponents`, dynamic params must be read inside `<Suspense>` or a route-level `loading.tsx`.
+- Do not use current dates/times during prerendering.
+- React lint rules reject synchronous `setState` inside effects.
 
-Stage 7 should add the remaining portal functionality:
+## Next stage: Stage 8
 
-1. Secure document storage and download with access checks.
-2. NDA management for buyers and sellers.
-3. Meeting scheduling and meeting records.
-4. Task assignment and completion.
-5. Direct messages between role participants.
-6. Sidebar links, tests, README update and commit.
+Stage 8 is deployment preparation and final testing. Suggested work:
 
-The sidebar currently marks these sections with **Stage 7** badges. Replace those badges with live links as each page is built.
+1. Add rate limiting to auth, contact and consultation endpoints.
+2. Replace placeholder contact details in `frontend/src/lib/site.ts` (`hello@meridiana.com`, `+1 (212) 555-0148`).
+3. Decide on production document storage (local disk is fine for a single server; cloud storage is better for multiple servers).
+4. Set production environment values: real `MONGO_URI`, strong `JWT_SECRET`, production `CLIENT_URL`, new admin password.
+5. Create the GitHub remote and push the repository.
+6. Choose hosting (for example Vercel for the frontend and Render/Railway/Fly for the backend).
+7. Run the full test suite once more against the deployed environment.
+8. Write deployment instructions in the README.
 
 ## Useful commands
 
@@ -126,14 +139,15 @@ The local admin email and password are configured in `backend/.env`. Do not put 
 - Frontend and backend are separate folders.
 - JWT is stored in browser `localStorage` under `meridiana_token` and sent as `Authorization: Bearer <token>`.
 - Local MongoDB data is stored in the ignored `backend/.mongo-data` folder, so records survive a server restart.
+- Uploaded files are stored in the ignored `backend/uploads` folder.
 - API success shape: `{ success: true, message, data? }`.
-- API error shape: `{ success: false, message, errors?, stack? }`.
+- API error shape: `{ success: false, message, errors?, stack? }` (stack only in development).
 - An advisor account can be created by registering a buyer account and then having the administrator change its role through Manage Users.
-- Stage 8 will cover final testing, fixes and deployment preparation.
+- No GitHub remote exists yet.
 
 ## Checkpoint commit
 
-Stage 6 is saved in Git. Check the latest commit with:
+Stage 7 is saved in Git. Check the latest commit with:
 
 ```bash
 git log -1 --oneline

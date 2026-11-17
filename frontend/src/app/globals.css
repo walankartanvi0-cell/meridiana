@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/*
+  Meridiana design tokens (Tailwind CSS v4).
+  These become utility classes such as bg-navy-900, text-gold-500, font-display.
+*/
+@theme {
+  --color-navy-950: #07121f;
+  --color-navy-900: #0a1c31;
+  --color-navy-800: #102b4a;
+  --color-navy-700: #1b3d63;
+  --color-navy-600: #2b5480;
+
+  --color-gold-600: #a9853f;
+  --color-gold-500: #c8a45c;
+  --color-gold-400: #d9bb7d;
+  --color-gold-300: #ead6a9;
+  --color-gold-100: #f7efdc;
+
+  --color-ivory-50: #fcfaf6;
+  --color-ivory-100: #f6f0e5;
+  --color-ivory-200: #ece2cf;
+
+  --color-charcoal-900: #1b2027;
+  --color-charcoal-700: #3c4550;
+  --color-charcoal-500: #6b7480;
+
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
+
+  --shadow-elevated: 0 24px 60px -28px rgb(7 18 31 / 0.35);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-white);
+    color: var(--color-charcoal-900);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-300);
+    color: var(--color-navy-950);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+/* Reusable layout helper: a centred, max-width content column. */
+@utility container-wide {
+  width: 100%;
+  max-width: 84rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* Subtle entrance animation used across the site. */
+@keyframes mer-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: mer-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+}

@@ -1,0 +1,30 @@
+# Dependencies (installed by npm – never commit these)
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Backend build output
+backend/dist/
+
+# Real environment files contain secrets – never commit them.
+# The *.example files below are safe templates and ARE committed.
+.env
+.env.local
+.env.*.local
+frontend/.env.local
+backend/.env
+
+# Uploaded documents (real client files stay on the server only)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs and editor / OS files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

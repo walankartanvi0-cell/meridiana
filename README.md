@@ -132,13 +132,30 @@ Authentication endpoints:
 
 After signing in, each role is sent to its own dashboard: `/dashboard/admin`, `/dashboard/advisor`, `/dashboard/buyer` or `/dashboard/seller`. Passwords are hashed with bcrypt, and every protected API request checks the JWT and the user's role.
 
+### 5. Dashboard management features
+
+Stage 5 adds working role-specific dashboards:
+
+- **Administrator:** manage users, buyer profiles and seller profiles; review platform analytics; read notifications; update account details and password.
+- **Advisor:** review notifications and manage account settings.
+- **Buyer:** maintain investment criteria through the buyer profile, review notifications and manage account settings.
+- **Seller:** maintain the business profile, review notifications and manage account details and password.
+
+The sidebar only links to pages that exist. Deal management, documents, NDAs, meetings, tasks and messages are clearly marked as later-stage features instead of appearing as broken links.
+
+The main API groups used by the dashboards are:
+
+- `/api/admin` – administrator-only user, buyer, seller and analytics endpoints
+- `/api/account` – profile and password endpoints for the signed-in user
+- `/api/notifications` – in-app notification endpoints
+
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure
 - [x] Stage 2 – Frontend design and public website
 - [x] Stage 3 – Backend setup and MongoDB connection
 - [x] Stage 4 – Registration, login and authentication
-- [ ] Stage 5 – User roles and dashboards
+- [x] Stage 5 – User roles and dashboards
 - [ ] Stage 6 – M&A deal management features
 - [ ] Stage 7 – Document management and other functionality
 - [ ] Stage 8 – Testing, fixes and deployment preparation

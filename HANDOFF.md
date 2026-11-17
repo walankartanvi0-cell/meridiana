@@ -18,57 +18,75 @@ Then return to the existing conversation:
 
 If you start a **new** session instead, tell the assistant:
 
-> Read `HANDOFF.md` and continue Meridiana from the Stage 5 checkpoint.
+> Read `HANDOFF.md` and continue Meridiana from Stage 6.
 
 The project files and this note are on disk, so a new session can continue even without the old chat.
 
 ## Current stage
 
-Stage 5 (user roles and dashboards) is in progress.
+Stages 1 through 5 are complete and committed. The next work is Stage 6: M&A deal management.
 
-### Backend status: complete for this stage
+### What Stage 5 delivered
 
-Stage 5 backend work has been implemented and tested:
+Backend:
 
 - Buyer, Seller and Notification models.
-- Admin user management: list, update and delete users.
-- Admin buyer and seller profile management: list, create, update and delete.
+- Admin user, buyer profile and seller profile management.
 - Buyer and seller self-service profile endpoints.
 - Account details update and password change.
-- In-app notifications: list, mark one as read, mark all as read.
-- Admin analytics summary.
-- Welcome notifications when an account is created.
+- In-app notifications and admin analytics.
+- Welcome notifications on account creation.
 
-The Stage 5 API test passed all checks. The test script is at:
+Frontend:
+
+- Responsive role-specific dashboard shell.
+- Live navigation with no dead links.
+- Role-specific overview pages using live API data.
+- Admin user, buyer and seller management panels.
+- Admin analytics panel.
+- Notifications panel for all four roles.
+- Account settings panel for all four roles.
+- Buyer profile and seller business profile forms.
+- Stage 6 and Stage 7 features are shown as clearly marked future badges.
+
+### Verification completed
+
+All of these passed before the Stage 5 commit:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+```bash
+cd backend
+npm run typecheck
+npm run build
+```
+
+Two API test scripts also passed:
 
 ```text
 C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage5-api-test.mjs
+C:\Users\Tejal\AppData\Local\Temp\opencode\meridiana-stage5-ui-api-integration.mjs
 ```
 
-### Frontend status: partially complete
+The second script specifically tests the payloads and CRUD operations used by the new dashboard panels, including role-based access blocks.
 
-Finished frontend pieces:
+## Next stage: Stage 6
 
-- Shared dashboard UI helpers.
-- Responsive dashboard sidebar and header.
-- Role-specific navigation with live links and clearly marked future-stage badges.
-- Admin user management panel and page.
-- Admin analytics panel and page.
-- Notifications panel and pages for admin, advisor, buyer and seller.
-- Account settings panel and pages for admin, advisor, buyer and seller.
-- Seller profile page currently uses the account settings panel.
+Stage 6 should add deal management:
 
-Still to build:
+1. Deal model with stages, parties, values and assigned advisor.
+2. Admin/advisor deal CRUD APIs.
+3. Buyer and seller read-only deal views where appropriate.
+4. Transaction pipeline UI.
+5. Deal detail view.
+6. Buyer interest and seller progress views.
+7. Final tests, README update and commit.
 
-1. Admin Buyers management panel and page.
-2. Admin Sellers management panel and page.
-3. Buyer profile panel and `/dashboard/buyer/profile` page.
-4. Seller business profile panel and `/dashboard/seller/business-profile` page.
-5. Role-specific overview pages (replace the current overview placeholders with live summary cards and links).
-6. Update `README.md` Stage 5 checkbox and account-management notes.
-7. Run final checks, rerun the Stage 5 API test, and commit Stage 5 as complete.
-
-The unfinished sections are marked with **Stage 5** badges in the sidebar, so the current checkpoint has no dead links.
+The sidebar currently marks these sections with **Stage 6** badges. Replace those badges with live links as each page is built.
 
 ## Useful commands
 
@@ -103,14 +121,13 @@ The local admin email and password are configured in `backend/.env`. Do not put 
 - API error shape: `{ success: false, message, errors?, stack? }`.
 - `frontend/next.config.ts` uses `cacheComponents: true`; avoid using current dates/times during prerendering.
 - React lint rules in this project reject synchronous `setState` inside effects.
-- Stage 6 will add deal management. Stage 7 will add documents, NDAs, meetings, tasks and messages.
+- Stage 7 will add documents, NDAs, meetings, tasks and messages.
+- Stage 8 will cover final testing, fixes and deployment preparation.
 
 ## Checkpoint commit
 
-The current work is saved in a Git checkpoint commit. Check it with:
+Stage 5 is saved in Git. Check the latest commit with:
 
 ```bash
 git log -1 --oneline
 ```
-
-Stage 5 should be committed again as complete once the remaining panels and pages above are finished.

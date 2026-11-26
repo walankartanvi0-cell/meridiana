@@ -67,6 +67,7 @@ const quickLinks: Record<UserRole, { label: string; href: string }[]> = {
     { label: "NDAs", href: "/dashboard/admin/ndas" },
     { label: "Meetings", href: "/dashboard/admin/meetings" },
     { label: "Tasks", href: "/dashboard/admin/tasks" },
+    { label: "Messages", href: "/dashboard/admin/messages" },
     { label: "Analytics", href: "/dashboard/admin/analytics" },
     { label: "Notifications", href: "/dashboard/admin/notifications" },
   ],

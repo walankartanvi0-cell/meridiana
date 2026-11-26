@@ -288,6 +288,33 @@ npm run lint
 npm run build
 ```
 
+## Running this repo on another computer
+
+The `.env` files are intentionally **not** committed because they contain secrets. After cloning, set them up once:
+
+1. Install packages:
+
+```bash
+cd frontend && npm install
+cd ../backend && npm install
+cd ..
+```
+
+2. Copy the example env files:
+
+- `frontend/.env.local.example` → `frontend/.env.local` (the default API URL works for local development)
+- `backend/.env.example` → `backend/.env`, then set a long random `JWT_SECRET` and a `SEED_ADMIN_PASSWORD`
+
+3. Start both apps from the project root:
+
+```bash
+npm run dev
+```
+
+This uses the automatic local MongoDB — no Atlas account is needed. On the first start, `mongodb-memory-server` downloads a MongoDB binary (~780 MB), so allow a few minutes and an internet connection. The local admin created from `SEED_ADMIN_PASSWORD` is separate from any admin in a shared Atlas database.
+
+To use a shared MongoDB Atlas database instead, put its `MONGO_URI` in `backend/.env` and run `npm --prefix backend run dev:real` plus the frontend dev server. **Never commit real credentials.**
+
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure

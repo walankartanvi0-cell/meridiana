@@ -21,9 +21,16 @@ const app = express();
 
 // Security headers and cross-origin access for the separate Next.js frontend.
 app.use(helmet());
+
+// In production only the deployed frontend is allowed. Localhost origins are
+// useful while developing, but should never be accepted by a live API.
+const allowedOrigins: (string | RegExp)[] = [env.clientUrl];
+if (env.nodeEnv !== "production") {
+  allowedOrigins.push(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/);
+}
 app.use(
   cors({
-    origin: [env.clientUrl, /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );

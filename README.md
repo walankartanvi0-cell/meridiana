@@ -315,6 +315,51 @@ This uses the automatic local MongoDB — no Atlas account is needed. On the fir
 
 To use a shared MongoDB Atlas database instead, put its `MONGO_URI` in `backend/.env` and run `npm --prefix backend run dev:real` plus the frontend dev server. **Never commit real credentials.**
 
+## Deploying to the internet (Vercel + Render)
+
+The recommended setup is **Next.js on Vercel** and the **Express API on Render**. The repo includes `render.yaml`, so Render can create the API automatically. No secrets are stored in GitHub — all secrets are entered in the hosting dashboards.
+
+### 1. Deploy the backend on Render
+
+1. Sign in at https://dashboard.render.com and choose **New → Blueprint**.
+2. Connect this GitHub repository (`meridiana`). Render will find `render.yaml` and show the `meridiana-api` service.
+3. Enter these values when prompted:
+   - `MONGO_URI`: your MongoDB Atlas connection string, including the database name, e.g. `mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/meridiana`
+   - `CLIENT_URL`: a temporary `https://...` URL (replace it with the real Vercel URL in step 3)
+   - `SEED_ADMIN_PASSWORD`: a strong password for the first administrator
+   - `JWT_SECRET`: leave the generated value, or replace it with a long random string
+4. Click **Apply** and wait for the deploy to finish.
+5. Check `https://meridiana-api.onrender.com/api/health` — it should return `"database":"connected"`.
+
+### 2. Deploy the frontend on Vercel
+
+1. Sign in at https://vercel.com and choose **Add New → Project**.
+2. Import the same GitHub repository.
+3. Set **Root Directory** to `frontend` (Framework Preset: Next.js).
+4. Add the environment variable:
+
+```text
+NEXT_PUBLIC_API_URL=https://meridiana-api.onrender.com/api
+```
+
+5. Click **Deploy**, then copy your site URL (for example `https://meridiana-abc123.vercel.app`).
+
+### 3. Connect the two
+
+Go back to Render → `meridiana-api` → **Environment**, set `CLIENT_URL` to the exact Vercel URL from step 2, and save. Render will redeploy. This step is required for browser requests to be allowed (CORS).
+
+### 4. Test the live site
+
+Open the Vercel URL, register a buyer/seller account, sign in, and create a deal. Also open `https://meridiana-api.onrender.com/api/health` to confirm the database is connected.
+
+### Deployment notes
+
+- **Never commit real credentials.** Keep them in Render/Vercel environment variables only. The repo is public.
+- **Atlas network access:** Render's free instances have changing IP addresses, so add `0.0.0.0/0` to your Atlas IP access list (or use a fixed IP on a paid plan). Restrict it later if possible.
+- **Uploaded documents** are saved on the backend's local disk. On Render's free plan there is no persistent disk, so uploads may disappear after a restart. A paid disk or cloud storage is needed for a real production system.
+- Free Render services sleep when idle; the first request after inactivity can take around 30 seconds.
+- Payments are not part of this project. If payment collection is added later, it should be a separate, explicitly approved feature.
+
 ## Build plan
 
 - [x] Stage 1 – Project setup and folder structure

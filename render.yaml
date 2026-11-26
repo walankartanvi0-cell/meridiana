@@ -1,0 +1,26 @@
+# Render Blueprint for the Meridiana API.
+# Secrets are entered in the Render dashboard and are never stored in this file.
+services:
+  - type: web
+    name: meridiana-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        value: admin@meridiana.local
+      - key: SEED_ADMIN_PASSWORD
+        sync: false

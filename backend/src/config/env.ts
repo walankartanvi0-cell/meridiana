@@ -25,4 +25,13 @@ export function validateEnv(): void {
   if (!env.jwtSecret || env.jwtSecret === "replace-me-with-a-long-random-secret") {
     throw new Error("JWT_SECRET must be set to a long random value in backend/.env.");
   }
+
+  if (env.nodeEnv === "production") {
+    if (!/^https:\/\//.test(env.clientUrl)) {
+      throw new Error("CLIENT_URL must be the public https:// frontend URL in production.");
+    }
+    if (/^mongodb:\/\/(localhost|127\.0\.0\.1)/i.test(env.mongoUri)) {
+      throw new Error("MONGO_URI must point to a hosted MongoDB in production.");
+    }
+  }
 }

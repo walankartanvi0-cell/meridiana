@@ -4,6 +4,9 @@
   "private": true,
   "description": "Express REST API for the Meridiana M&A advisory platform",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "tsx watch src/dev-server.ts",
     "dev:real": "tsx watch src/server.ts",

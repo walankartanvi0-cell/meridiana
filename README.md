@@ -102,6 +102,51 @@ Then open http://localhost:3000 in your browser. The API runs at http://localhos
 
 You can check that the backend is working by opening http://localhost:5000/api/health. When connected, the response includes `"database":"connected"`.
 
+### Connecting a real MongoDB Atlas database
+
+The automatic database is only for local development. To use a cloud database (needed for a deployed site), create a free MongoDB Atlas cluster:
+
+1. Sign up at https://www.mongodb.com/cloud/atlas/register.
+2. Create a **free M0 cluster** and choose the region closest to you.
+3. In **Database Access**, add a database user with a username and a strong password. Write the password down.
+4. In **Network Access**, add an IP address. For testing you can allow `0.0.0.0/0`; for production, allow only your server's IP.
+5. Click **Connect → Drivers** and copy the connection string. It looks like:
+
+   ```text
+   mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   ```
+
+6. Open `backend/.env` and replace `MONGO_URI` with your string. Put the database name `meridiana` before the `?` and replace `USER` and `PASSWORD`:
+
+   ```text
+   MONGO_URI=mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/meridiana?retryWrites=true&w=majority
+   ```
+
+7. Test the connection (this never starts the website, it only checks the database):
+
+   ```bash
+   cd backend
+   npm run db:check
+   ```
+
+   A successful check prints `Connection OK`, the database name and a list of collections.
+
+8. Create the first administrator in the new database:
+
+   ```bash
+   npm run seed:admin
+   ```
+
+9. Start the backend against the real database:
+
+   ```bash
+   npm run dev:real
+   ```
+
+`npm run dev` always uses the automatic local database. `npm run dev:real` and `npm start` always use the `MONGO_URI` from `backend/.env`. Only run one of them at a time, because both use port `5000`.
+
+The new database starts empty, so the records from the local `.mongo-data` folder do not move across. Create your accounts again, or use the admin account created in step 8.
+
 The contact and consultation forms save their submissions to MongoDB through:
 
 - `POST /api/contact`

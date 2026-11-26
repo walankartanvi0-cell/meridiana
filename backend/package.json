@@ -10,6 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "seed:admin": "tsx src/scripts/seedAdmin.ts",
+    "db:check": "tsx src/scripts/checkDb.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

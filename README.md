@@ -47,7 +47,18 @@ Project 1/
 
 You need **Node.js 20.9 or newer**. For local development, the backend can start its own temporary MongoDB automatically, so you do not need to install MongoDB yourself. For production, you will need a real MongoDB connection string (local MongoDB or MongoDB Atlas).
 
-Open a terminal in this folder.
+Open a terminal in this folder. There are also convenience commands at the project root, so you can run everything from one place:
+
+```bash
+npm run dev          # starts backend + frontend together
+npm run db:check     # tests the database connection
+npm run seed:admin   # creates the first administrator in a real database
+npm run typecheck
+npm run lint
+npm run build
+```
+
+`npm run dev` automatically starts the backend on the database configured in `backend/.env`. If that file has no real `MONGO_URI`, it falls back to the automatic local development database.
 
 ### 1. Install packages (one time)
 
@@ -66,6 +77,16 @@ Copy the example files and fill in your own values:
 In `backend/.env`, set `JWT_SECRET` to a long random string. The `MONGO_URI` value is only needed when using a real MongoDB server. The `SEED_ADMIN_*` values create the first administrator when the local development server starts.
 
 ### 3. Run both apps
+
+From the **project root**, one command starts both apps:
+
+```bash
+npm run dev
+```
+
+This runs the backend on port 5000 and the frontend on port 3000 in the same terminal. Press **Ctrl+C** to stop both. To use different ports, set `BACKEND_PORT` and `FRONTEND_PORT` before running the command.
+
+You can also run them in separate terminals:
 
 Terminal 1 (backend):
 
@@ -103,6 +124,8 @@ Then open http://localhost:3000 in your browser. The API runs at http://localhos
 You can check that the backend is working by opening http://localhost:5000/api/health. When connected, the response includes `"database":"connected"`.
 
 ### Connecting a real MongoDB Atlas database
+
+**Current status:** this project is connected to a free Atlas cluster through `backend/.env`. Run `npm run db:check` from the project root to confirm it. The steps below are for connecting a different cluster later.
 
 The automatic database is only for local development. To use a cloud database (needed for a deployed site), create a free MongoDB Atlas cluster:
 

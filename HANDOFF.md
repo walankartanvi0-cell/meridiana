@@ -24,7 +24,17 @@ The project files and this note are on disk, so a new session can continue even 
 
 ## Current stage
 
-Stages 1 through 7 are complete and committed. The next work is **Stage 8: deployment preparation and final testing**.
+Stages 1 through 7 are complete and committed. **MongoDB Atlas is connected and the whole platform is running against it.** The next work is **Stage 8: deployment preparation and final testing**.
+
+### Database connection
+
+- `backend/.env` contains a working `mongodb+srv://` connection string for the free Atlas cluster `meridiana`.
+- `npm run db:check` (works from the root or from `backend`) confirms the connection and lists collections.
+- `npm run seed:admin` created `admin@meridiana.local` in Atlas.
+- The backend now runs with `npm run dev:real`, which uses `MONGO_URI` from `backend/.env`. `npm run dev` still uses the automatic local database.
+- Root `npm run dev` detects the Atlas URI and starts `dev:real` automatically (`scripts/dev.mjs`).
+- The Atlas database started empty: local test records in `backend/.mongo-data` were not copied over.
+- Verified against Atlas: frontend HTTP 200, API health `database=connected`, admin login, and all API groups (`/auth`, `/admin`, `/deals`, `/documents`, `/ndas`, `/meetings`, `/tasks`, `/messages`, `/notifications`) respond successfully.
 
 ### What Stage 7 delivered
 
@@ -104,13 +114,16 @@ Stage 8 is deployment preparation and final testing. Suggested work:
 1. Add rate limiting to auth, contact and consultation endpoints.
 2. Replace placeholder contact details in `frontend/src/lib/site.ts` (`hello@meridiana.com`, `+1 (212) 555-0148`).
 3. Decide on production document storage (local disk is fine for a single server; cloud storage is better for multiple servers).
-4. Set production environment values: real `MONGO_URI`, strong `JWT_SECRET`, production `CLIENT_URL`, new admin password.
-5. Create the GitHub remote and push the repository.
-6. Choose hosting (for example Vercel for the frontend and Render/Railway/Fly for the backend).
-7. Run the full test suite once more against the deployed environment.
-8. Write deployment instructions in the README.
+4. Tighten Atlas Network Access from `0.0.0.0/0` to the deployed server's IP.
+5. Use a fresh production database (not the development cluster), a new strong `JWT_SECRET`, production `CLIENT_URL` and a new admin password.
+6. Create the GitHub remote and push the repository.
+7. Choose hosting (for example Vercel for the frontend and Render/Railway/Fly for the backend).
+8. Run the full test suite once more against the deployed environment.
+9. Write deployment instructions in the README.
 
 ## Useful commands
+
+The project root has its own `package.json`. Run `npm run dev` from the project root to start both apps together. Previously, running `npm run dev` from this folder let npm pick up an unrelated `tejal` package in `C:\Users\Tejal`, which crashed with `Cannot find module '...\index.js'`.
 
 Backend:
 
